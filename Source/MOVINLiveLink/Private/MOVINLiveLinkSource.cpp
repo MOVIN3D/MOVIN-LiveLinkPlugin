@@ -4,8 +4,13 @@
 #include "MOVINLiveLinkModule.h"
 #include "ILiveLinkClient.h"
 #include "Roles/LiveLinkAnimationRole.h"
+#include "Templates/Atomic.h"
 
 #define LOCTEXT_NAMESPACE "MOVINLiveLinkSource"
+
+FCriticalSection FMOVINLiveLinkSource::ActivePortsCriticalSection;
+TSet<int32> FMOVINLiveLinkSource::ActivePorts;
+static TAtomic<int32> GMOVINLiveLinkThreadCounter(0);
 
 FMOVINLiveLinkSource::FMOVINLiveLinkSource(int32 InPort)
 	: Port(InPort)
@@ -13,6 +18,11 @@ FMOVINLiveLinkSource::FMOVINLiveLinkSource(int32 InPort)
 	, WaitTime(FTimespan::FromMilliseconds(100))
 	, SourceStatus(LOCTEXT("SourceStatus_NotConnected", "Not Connected"))
 {
+	bPortRegistered = TryRegisterPort(Port);
+	if (!bPortRegistered)
+	{
+		SourceStatus = FText::Format(LOCTEXT("SourceStatus_DuplicatePort", "Port {0} is already in use by another MOVIN source"), FText::AsNumber(Port));
+	}
 }
 
 FMOVINLiveLinkSource::~FMOVINLiveLinkSource()
@@ -32,12 +42,48 @@ FMOVINLiveLinkSource::~FMOVINLiveLinkSource()
 		ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(Socket);
 		Socket = nullptr;
 	}
+
+	if (bPortRegistered)
+	{
+		UnregisterPort(Port);
+		bPortRegistered = false;
+	}
+}
+
+bool FMOVINLiveLinkSource::IsPortInUse(int32 InPort)
+{
+	FScopeLock Lock(&ActivePortsCriticalSection);
+	return ActivePorts.Contains(InPort);
+}
+
+bool FMOVINLiveLinkSource::TryRegisterPort(int32 InPort)
+{
+	FScopeLock Lock(&ActivePortsCriticalSection);
+	if (ActivePorts.Contains(InPort))
+	{
+		return false;
+	}
+
+	ActivePorts.Add(InPort);
+	return true;
+}
+
+void FMOVINLiveLinkSource::UnregisterPort(int32 InPort)
+{
+	FScopeLock Lock(&ActivePortsCriticalSection);
+	ActivePorts.Remove(InPort);
 }
 
 void FMOVINLiveLinkSource::ReceiveClient(ILiveLinkClient* InClient, FGuid InSourceGuid)
 {
 	Client = InClient;
 	SourceGuid = InSourceGuid;
+
+	if (!bPortRegistered)
+	{
+		SourceStatus = FText::Format(LOCTEXT("SourceStatus_DuplicatePort", "Port {0} is already in use by another MOVIN source"), FText::AsNumber(Port));
+		return;
+	}
 
 	// Create socket and start listening
 	FIPv4Endpoint Endpoint(FIPv4Address::Any, Port);
@@ -63,7 +109,7 @@ void FMOVINLiveLinkSource::ReceiveClient(ILiveLinkClient* InClient, FGuid InSour
 
 bool FMOVINLiveLinkSource::IsSourceStillValid() const
 {
-	return !bStopping && Thread != nullptr && Socket != nullptr;
+	return !bStopping && bPortRegistered && Thread != nullptr && Socket != nullptr;
 }
 
 bool FMOVINLiveLinkSource::RequestSourceShutdown()
@@ -102,7 +148,7 @@ bool FMOVINLiveLinkSource::Init()
 void FMOVINLiveLinkSource::StartThread()
 {
 	FString ThreadName = TEXT("MOVINLiveLink UDP Receiver ");
-	ThreadName.AppendInt(FAsyncThreadIndex::GetNext());
+	ThreadName.AppendInt(++GMOVINLiveLinkThreadCounter);
 	Thread = FRunnableThread::Create(this, *ThreadName, 128 * 1024, TPri_AboveNormal, FPlatformAffinity::GetPoolThreadMask());
 }
 

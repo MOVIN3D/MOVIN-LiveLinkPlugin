@@ -31,6 +31,9 @@ public:
 	FMOVINLiveLinkSource(int32 InPort);
 	virtual ~FMOVINLiveLinkSource();
 
+	static bool IsPortInUse(int32 InPort);
+	int32 GetPort() const { return Port; }
+
 	// ~Begin ILiveLinkSource interface
 	virtual void ReceiveClient(ILiveLinkClient* InClient, FGuid InSourceGuid) override;
 	virtual bool IsSourceStillValid() const override;
@@ -59,6 +62,9 @@ private:
 	/** Update or create the skeleton static data for a subject. Returns true if static data was pushed (skeleton changed). */
 	bool UpdateStaticData(const FMOVINDatagram& Datagram, const FName& SubjectName, bool bForceRebuild = false);
 
+	static bool TryRegisterPort(int32 InPort);
+	static void UnregisterPort(int32 InPort);
+
 private:
 
 	ILiveLinkClient* Client = nullptr;
@@ -66,6 +72,9 @@ private:
 
 	/** UDP port to listen on */
 	int32 Port;
+
+	/** Whether this source successfully reserved its port in the global registry */
+	bool bPortRegistered = false;
 
 	/** The network socket */
 	FSocket* Socket = nullptr;
@@ -99,4 +108,8 @@ private:
 
 	/** Critical section for thread-safe access */
 	FCriticalSection CriticalSection;
+
+	/** Global registry of active MOVIN LiveLink UDP ports */
+	static FCriticalSection ActivePortsCriticalSection;
+	static TSet<int32> ActivePorts;
 };

@@ -2,6 +2,7 @@
 
 #include "MOVINLiveLinkSourceEditor.h"
 #include "MOVINLiveLinkSource.h"
+#include "Misc/MessageDialog.h"
 #include "Widgets/Input/SSpinBox.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SBox.h"
@@ -60,6 +61,18 @@ void SMOVINLiveLinkSourceEditor::Construct(const FArguments& Args)
 
 FReply SMOVINLiveLinkSourceEditor::OnAddSourceClicked()
 {
+	if (FMOVINLiveLinkSource::IsPortInUse(PortNumber))
+	{
+		FMessageDialog::Open(
+			EAppMsgType::Ok,
+			FText::Format(
+				LOCTEXT("DuplicatePortMessage", "A MOVIN LiveLink Source using UDP port {0} already exists."),
+				FText::AsNumber(PortNumber)
+			)
+		);
+		return FReply::Handled();
+	}
+
 	TSharedPtr<FMOVINLiveLinkSource> NewSource = MakeShared<FMOVINLiveLinkSource>(PortNumber);
 
 	FString ConnectionString = FString::Printf(TEXT("Port=%d"), PortNumber);

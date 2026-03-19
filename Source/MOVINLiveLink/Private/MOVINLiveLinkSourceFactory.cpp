@@ -33,6 +33,11 @@ TSharedPtr<ILiveLinkSource> UMOVINLiveLinkSourceFactory::CreateSource(const FStr
 		PortValue = FCString::Atoi(*Parsed[1]);
 	}
 
+	if (FMOVINLiveLinkSource::IsPortInUse(PortValue))
+	{
+		return nullptr;
+	}
+
 	return MakeShared<FMOVINLiveLinkSource>(PortValue);
 }
 
