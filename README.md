@@ -48,9 +48,9 @@ To drive a Skeletal Mesh character with LiveLink data:
 
 1. **Create an Animation Blueprint** for your character's Skeleton
 2. In the **AnimGraph**, add a **Live Link Pose** node
-3. In the **Live Link Pose** node, select the subject that corresponds to the character you want to drive
-4. If MOVIN Studio is streaming an **Actor**, receive it in Unreal using the `movinman.fbx` model
-5. If MOVIN Studio is streaming a **character model**, the model imported into Unreal must be the exact same `.fbx` used in MOVIN Studio
+3. If MOVIN Studio is streaming an **Actor**, receive it in Unreal using the `movinman.fbx` model
+4. If MOVIN Studio is streaming a **character model**, the model imported into Unreal must be the exact same `.fbx` used in MOVIN Studio
+5. In the **Live Link Pose** node, select the subject that corresponds to the character you want to drive
 6. Connect the Live Link Pose output to the **Output Pose**
 7. Assign the Animation Blueprint to your Skeletal Mesh Actor
 
