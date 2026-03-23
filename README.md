@@ -12,7 +12,7 @@ Receives real-time motion capture data from **MOVIN Studio** via UDP and feeds i
 
 ## Requirements
 
-- Unreal Engine **5.3+**
+- Unreal Engine **5.3+** (5.3 ~ 5.7)
 - Windows 64-bit
 - MOVIN Studio (sending motion capture data)
 
