@@ -15,6 +15,7 @@ Receives real-time motion capture data from **MOVIN Studio** via UDP and feeds i
 - Unreal Engine **5.3+** (5.3 ~ 5.7)
 - Windows 64-bit
 - MOVIN Studio (sending motion capture data)
+- A **C++ Unreal project** (not a Blueprint-only project)
 
 ## Installation
 
@@ -32,7 +33,19 @@ YourProject/
 └── YourProject.uproject
 ```
 
-Rebuild your project. The plugin will be detected automatically.
+In most cases, placing the plugin in the `Plugins/` folder and reopening the project from the Epic Games Launcher will automatically trigger the plugin build.
+
+If the plugin does not build automatically:
+
+1. Put the plugin in the project's `Plugins/` folder
+2. Right-click the `.uproject` file
+3. Click **Show more options**
+4. Click **Generate Visual Studio project files**
+5. Open the generated Visual Studio solution
+6. Right-click the project in Solution Explorer
+7. Click **Build**
+
+After the build completes, reopen the project in Unreal Editor.
 
 ## Quick Start (Editor)
 
