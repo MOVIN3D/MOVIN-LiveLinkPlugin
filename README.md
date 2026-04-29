@@ -52,9 +52,13 @@ After the build completes, reopen the project in Unreal Editor.
 
 ### Option 2: Use a prebuilt plugin in a Blueprint-only project
 
-You can also use the plugin in a **Blueprint-only project** if the plugin has already been built for the same Unreal Engine version and platform.
+You can also use the plugin in a **Blueprint-only project** with a prebuilt plugin package.
 
-Copy the prebuilt plugin into your project's `Plugins/` folder and keep these files and folders:
+Download the prebuilt plugin for your Unreal Engine version from the [prebuilt release](https://github.com/MOVIN3D/MOVIN-UELiveLink-Plugin/releases/tag/prebuilt), then extract it into your project's `Plugins/` folder.
+
+If you need to build the prebuilt plugin yourself, first follow **Option 1** in a C++ Unreal project using the same Unreal Engine version and platform. Once the plugin has been built successfully, copy the built plugin into the Blueprint-only project's `Plugins/` folder.
+
+When moving the built plugin, keep these files and folders:
 
 - `MOVINLiveLink.uplugin`
 - `Binaries/`
