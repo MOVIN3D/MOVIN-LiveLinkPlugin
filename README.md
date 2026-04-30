@@ -58,15 +58,6 @@ Download the prebuilt plugin for your Unreal Engine version from the [prebuilt r
 
 If you need to build the prebuilt plugin yourself, first follow **Option 1** in a C++ Unreal project using the same Unreal Engine version and platform. Once the plugin has been built successfully, copy the built plugin into the Blueprint-only project's `Plugins/` folder.
 
-When moving the built plugin, keep these files and folders:
-
-- `MOVINLiveLink.uplugin`
-- `Binaries/`
-- `Config/`
-- `Resources/`
-
-`Intermediate/` is not required for distribution in this case.
-
 ## Quick Start (Editor)
 
 1. Open your project in Unreal Editor
